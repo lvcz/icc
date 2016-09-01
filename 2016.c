@@ -1,4 +1,13 @@
- #include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+
+double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
+int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
+void imprime_sistema(double *A, double *b, int n) ;
+
+
 
 
 
@@ -31,38 +40,45 @@ int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, d
 
 
 
-void main (int argc int** argv){
+void main (int argc, int** argv){
 
-	int N=1;
-	double *a=NULL, *b=NULL,*x=NULL;
+	int N = 1;
+	double *A = NULL, 
+	*b = NULL , *x = NULL;
 	double erro;
 
 
 	printf("/nDigite o tamanho da matriz: ");
 	scanf("%d",&N);
 	srand(20142);
-	printf("/n Digite o erro:")
-	scanf("%la",&erro);
+	//printf("/n Digite o erro:");
+	//scanf("%la",&erro);
 
 
-	A=generateSquareRandoPositiveDifneMatrix(N);
-	x= (double*) malloc(N*sizeof(double));
-	b= (double*) malloc(N*sizeof(double));
+	A = generateSquareRandomPositiveDefiniteMatrix(N);
+	x = (double*) malloc(N*sizeof(double));
+	b = (double*) malloc(N*sizeof(double));
 
-	invRandMax= 1.0/(double)RAND_MAX;
-	for (i=0;i<N,++i){
-		b[i]=(double)rand()*invRandMax;
+	double invRandMax = 1.0 / (double)RAND_MAX;
+	for (int i = 0 ; i<N ; ++i){
+		b[i] = (double)rand()*invRandMax;
 	}
+	
+	imprime_sistema(A,b,N);
 }
 
-int generateRandomPositiveDefiniteLinearSystem( unsigned int N, double *A, double *b )
+
+double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n )
 {
-  if ( !A || !b )
-    return (-1);
+  double *mat = NULL;
+
+  /* return NULL if memory allocation fails */
+  if ( ! (mat = (double *) malloc(n*n*sizeof(double))) )
+    return (NULL);
 
   /* generate a randomly initialized matrix in row-major order */
-  double *ptr = A;
-  double *end = A + N*N;
+  double *ptr = mat;
+  double *end = mat + n*n;
 
   double invRandMax = 1.0/(double)RAND_MAX;
 
@@ -75,22 +91,32 @@ int generateRandomPositiveDefiniteLinearSystem( unsigned int N, double *A, doubl
      and diagonally dominant.
 
      A = A + transpose(A)
-     A = A + I*N                        */
+     A = A + I*n                        */
   unsigned int i,j;
-  for (i=0; i<N; ++i)
-    for (j=i+1; j<N; ++j)
+  for (i=0; i<n; ++i)
+    for (j=i+1; j<n; ++j)
     {
-      double aux = A[i*N+j];
-      A[i*N+j] += A[j*N+i];
-      A[j*N+i] += aux;
+      double aux = mat[i*n+j];
+      mat[i*n+j] += mat[j*n+i];
+      mat[j*n+i] += aux;
     }
 
-  for (i=0; i<N; ++i)
-    A[i*N+i] += A[i*N+i] + N;
+  for (i=0; i<n; ++i)
+    mat[i*n+i] += mat[i*n+i] + n;
 
-  /* create the vector of independent terms (b) */
-  for (i=0; i<N; ++i)
-    b[i] = (double)rand() * invRandMax
+  return (mat);
+}
 
-  return (0);
-}'
+
+void imprime_sistema(double *A, double *b, int n) {
+  
+  
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      printf( "%lfx%d ", A[i*n+j], j);
+    }
+    printf( "= %lf\n", b[i]);
+  }
+}
+
+
