@@ -108,7 +108,8 @@ double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n )
 }
 
 
-void imprime_sistema(double *A, double *b, int n) {
+void imprime_sistema(double *A, double *b, int n) 
+{
   
   
   for (int i = 0; i < n; ++i) {
@@ -117,6 +118,20 @@ void imprime_sistema(double *A, double *b, int n) {
     }
     printf( "= %lf\n", b[i]);
   }
+}
+
+
+double *GaussJacobi(double *A,double *b, int n)
+{
+	for (int i = 0 ; i < n ; ++i)
+	{
+		
+		for (int j = 0 ; j < n )
+		{
+		}
+	
+	}
+	
 }
 
 
