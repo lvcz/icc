@@ -76,7 +76,7 @@ void main (int argc, int** argv){
 	
 
 	double invRandMax = 1.0 / (double)RAND_MAX;
-	b = calcula_func_b(n);
+	&b = calcula_func_b(n);
 	
 	imprime_sistema(diag,b,n);
 }
