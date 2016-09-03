@@ -4,7 +4,7 @@
 #include <math.h>
 
 
-#define M_PI 3.14159265
+
 
 double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
 int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
