@@ -48,7 +48,7 @@ void main (int argc, int** argv){
 	int retorno =0;
 	double *A = NULL, 
 	double *diag = NULL;
-	*b = NULL , *x = NULL;
+	double *b = NULL , *x = NULL;
 	double erro;
 
 
@@ -58,8 +58,9 @@ void main (int argc, int** argv){
 	scanf("%d",&kMax);
 	printf("/nDigite o numero da diagonal: ");
 	scanf("%d",&k);
-	 if ( ! (diag = (double *) malloc(n*k*sizeof(double))) )
-		return (NULL);
+	diag = (double *) malloc(n*k*sizeof(double))) 
+		if( ! diag)
+		return (-1);
 	srand(20162);
 	//printf("/n Digite o erro:");
 	//scanf("%la",&erro);
@@ -137,7 +138,7 @@ double *GaussJacobi(double *A,double *b, int n)
 	for (int i = 0 ; i < n ; ++i)
 	{
 		
-		for (int j = 0 ; j < n )
+		for (int j = 0 ; j < n ; n++)
 		{
 		}
 	
