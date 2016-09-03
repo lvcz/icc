@@ -81,7 +81,7 @@ void main (int argc, int** argv){
 	imprime_sistema(diag,b,n);
 }
 
-double *caulula_func_b(int n)
+double *calcula_func_b(int n)
 {
 	double pi4 = 4 * ( M_PI * M_PI);
 	 
