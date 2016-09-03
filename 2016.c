@@ -10,7 +10,7 @@ double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
 int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
 void imprime_sistema(double *A, double *b, int n) ;
 double *calcula_func_b(int n);
-
+void *GaussSeidel(double *A,double *b,double *x, int n);
 
 
 
@@ -49,58 +49,77 @@ void main (int argc, int** argv){
 	int n;
 	int kMax = 0;
 	int k = 0;
-	int retorno =0;
+	//int retorno =0;
 	double *A = NULL; 
 	double *diag = NULL;
 	double *b = NULL;
 	double *x = NULL;
 	double erro;
-srand(20162);	
+   srand(20162);	
 
 	
 	printf("/n Digite o tamanho da matriz: ");
 	scanf("%d",&n);
-	printf("/n Digite o tamanho da matriz: ");
+	
 
-	 printf("/nDigite o numero de bandas da matriz: ");
-	scanf("%d",&kMax);
+	// printf("/nDigite o numero de bandas da matriz: ");
+	//scanf("%d",&kMax);
 	//printf("/nDigite o numero da diagonal: ");
 	//scanf("%d",&k);
 	//	diag = (double *) malloc(n*k*sizeof(double)) ;
 	//		if(diag == NULL)	return;
 	
-	printf("/n Digite o erro:");
+	//printf("/n Digite o erro:");
 	//scanf("%la",&erro);
 	
 	A = generateSquareRandomPositiveDefiniteMatrix(n);
 	//retorno = generateRandomDiagonal(n, n, kMax, diag);
-	 printf("chegay/n");
+	
 	x = (double*) malloc(n*sizeof(double));
 	//for (int i =0;i<n ;i++)
 
+	
+
 	//double invRandMax = 1.0 / (double)RAND_MAX;
-	//b = calcula_func_b(n);
+	b = calcula_func_b(n);
+	
+	for (int i = 0; i < n; ++i) {
+		x[i] = 0.0;
+	}
+	
+	
+	
+	
 	
 	imprime_sistema(A,b,n);
+	
+	GaussSeidel(A,b,x,n);
+	
+	for (int i = 0; i < n; ++i) {
+		printf( "x(%d)= %lf \n", i,x[i]);
+	}
+	
 }
 
 double *calcula_func_b(int n)
 {
-	 printf("chegay");
+	
 	double pi4 = 4 * ( M_PI * M_PI);
-	 printf("chegay");
+	
 	 
 	double *bx = NULL; 
-	if ( ! ( bx = (double*) malloc(n*sizeof(double))) );
-		return (NULL);
+	if ( ! ( bx = (double*) malloc(n*sizeof(double))) )
+			return (NULL);
+		
 	
 	for (int i = 0 ; i < n ; ++i)
 		{ 
-			printf("213");
+			
 			double x = (i* M_PI/n);
 			bx[i] = pi4 * (sin ( 2 * M_PI * x) + sin ( 2* M_PI *(M_PI - x)));
 		
 		}
+		
 	return (bx);
 }
 
@@ -153,24 +172,43 @@ void imprime_sistema(double *A, double *b, int n)
   
   
   for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      printf( "%lfx%d ", A[i*n+j], j);
-    }
-    printf( "= %lf\n", b[i]);
+	for (int j = 0; j < n; ++j) {
+		printf( "%lfx%d ", A[i*n+j], j);
+		}
+    printf( "= %lf \n", b[i]);
   }
 }
 
 
-double *GaussJacobi(double *A,double *b, int n)
+void *GaussSeidel(double *A,double *b,double *x, int n)
 {
-	for (int i = 0 ; i < n ; ++i)
-	{
-		
-		for (int j = 0 ; j < n ; ++j)
-		{
-		}
+	int k =1;
 	
+	do
+	{	
+	for (int i = 0; i < n; ++i) {
+		
+		x[i] = b[i];
+		
+		for (int j = 0; j < i; ++j) 
+		{
+			x[i] -=  A[i*n+j] * x[j];
+			 
+			 
+		}
+		for (int j = i ; j<n; ++j)
+		{
+			x[i] -= A[i*n+j] * x[j];
+			 
+		}
+		x[i] =x[i] / A[i*n+i];
+		
+		 		
 	}
+	k++;
+	
+	 
+}while (k<5);
 		return NULL;
 }
 
