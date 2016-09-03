@@ -2,14 +2,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-
+#define M_PI 3.1415926535
 
 
 
 double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
 int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
 void imprime_sistema(double *A, double *b, int n) ;
-double *caulula_func_b(int n);
+double *calcula_func_b(int n);
 
 
 
@@ -46,44 +46,49 @@ int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, d
 
 void main (int argc, int** argv){
 
-	int n = 1;
+	int n;
 	int kMax = 0;
 	int k = 0;
 	int retorno =0;
 	double *A = NULL; 
 	double *diag = NULL;
 	double *b = NULL;
-	double*x = NULL;
+	double *x = NULL;
 	double erro;
+srand(20162);	
 
-
-	printf("/nDigite o tamanho da matriz: ");
+	
+	printf("/n Digite o tamanho da matriz: ");
 	scanf("%d",&n);
-	printf("/nDigite o numero de bandas da matriz: ");
+	printf("/n Digite o tamanho da matriz: ");
+
+	 printf("/nDigite o numero de bandas da matriz: ");
 	scanf("%d",&kMax);
-	printf("/nDigite o numero da diagonal: ");
-	scanf("%d",&k);
-	diag = (double *) malloc(n*k*sizeof(double)) ;
-		if(diag == NULL)	return;
-	srand(20162);
-	//printf("/n Digite o erro:");
+	//printf("/nDigite o numero da diagonal: ");
+	//scanf("%d",&k);
+	//	diag = (double *) malloc(n*k*sizeof(double)) ;
+	//		if(diag == NULL)	return;
+	
+	printf("/n Digite o erro:");
 	//scanf("%la",&erro);
-
-
+	
 	A = generateSquareRandomPositiveDefiniteMatrix(n);
-	retorno = generateRandomDiagonal(n, n, kMax, diag);
+	//retorno = generateRandomDiagonal(n, n, kMax, diag);
+	 printf("chegay/n");
 	x = (double*) malloc(n*sizeof(double));
-	
+	//for (int i =0;i<n ;i++)
 
-	double invRandMax = 1.0 / (double)RAND_MAX;
-	b = calcula_func_b(n);
+	//double invRandMax = 1.0 / (double)RAND_MAX;
+	//b = calcula_func_b(n);
 	
-	imprime_sistema(diag,b,n);
+	imprime_sistema(A,b,n);
 }
 
-double *caulula_func_b(int n)
+double *calcula_func_b(int n)
 {
+	 printf("chegay");
 	double pi4 = 4 * ( M_PI * M_PI);
+	 printf("chegay");
 	 
 	double *bx = NULL; 
 	if ( ! ( bx = (double*) malloc(n*sizeof(double))) );
@@ -91,6 +96,7 @@ double *caulula_func_b(int n)
 	
 	for (int i = 0 ; i < n ; ++i)
 		{ 
+			printf("213");
 			double x = (i* M_PI/n);
 			bx[i] = pi4 * (sin ( 2 * M_PI * x) + sin ( 2* M_PI *(M_PI - x)));
 		
