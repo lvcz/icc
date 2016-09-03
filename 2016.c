@@ -3,9 +3,13 @@
 #include <stdio.h>
 #include <math.h>
 
+
+#define M_PI 3.14159265
+
 double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
 int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
 void imprime_sistema(double *A, double *b, int n) ;
+double *caulula_func_b(int n);
 
 
 
@@ -47,7 +51,9 @@ void main (int argc, int** argv){
 	int k = 0;
 	int retorno =0;
 	double *A = NULL; 
-	double *diag = NULL, *b = NULL , *x = NULL;
+	double *diag = NULL;
+	double *b = NULL;
+	double*x = NULL;
 	double erro;
 
 
@@ -57,9 +63,8 @@ void main (int argc, int** argv){
 	scanf("%d",&kMax);
 	printf("/nDigite o numero da diagonal: ");
 	scanf("%d",&k);
-	diag = (double *) malloc(n*k*sizeof(double)) 
-		if( ! diag)
-		return (-1);
+	diag = (double *) malloc(n*k*sizeof(double)) ;
+		if(diag == NULL)	return;
 	srand(20162);
 	//printf("/n Digite o erro:");
 	//scanf("%la",&erro);
@@ -68,15 +73,33 @@ void main (int argc, int** argv){
 	A = generateSquareRandomPositiveDefiniteMatrix(n);
 	retorno = generateRandomDiagonal(n, n, kMax, diag);
 	x = (double*) malloc(n*sizeof(double));
-	b = (double*) malloc(n*sizeof(double));
+	
 
 	double invRandMax = 1.0 / (double)RAND_MAX;
-	for (int i = 0 ; i<n ; ++i){
-		b[i] = (double)rand()*invRandMax;
-	}
+	b = calcula_func_b(n);
 	
 	imprime_sistema(diag,b,n);
 }
+
+double *caulula_func_b(int n)
+{
+	double pi4 = 4 * ( M_PI * M_PI);
+	 
+	double *bx = NULL; 
+	if ( ! ( bx = (double*) malloc(n*sizeof(double))) );
+		return (NULL);
+	
+	for (int i = 0 ; i < n ; ++i)
+		{ 
+			double x = (i* M_PI/n);
+			bx[i] = pi4 * (sin ( 2 * M_PI * x) + sin ( 2* M_PI *(M_PI - x)));
+		
+		}
+	return (bx);
+}
+
+
+
 
 
 double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n )
@@ -142,7 +165,7 @@ double *GaussJacobi(double *A,double *b, int n)
 		}
 	
 	}
-	
+		return NULL;
 }
 
 
