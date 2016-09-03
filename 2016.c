@@ -42,29 +42,40 @@ int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, d
 
 void main (int argc, int** argv){
 
-	int N = 1;
+	int n = 1;
+	int kMax = 0;
+	int k = 0;
+	int retorno =0;
 	double *A = NULL, 
+	double *diag = NULL;
 	*b = NULL , *x = NULL;
 	double erro;
 
 
 	printf("/nDigite o tamanho da matriz: ");
-	scanf("%d",&N);
-	srand(20142);
+	scanf("%d",&n);
+	printf("/nDigite o numero de bandas da matriz: ");
+	scanf("%d",&kMax);
+	printf("/nDigite o numero da diagonal: ");
+	scanf("%d",&k);
+	 if ( ! (diag = (double *) malloc(n*k*sizeof(double))) )
+		return (NULL);
+	srand(20162);
 	//printf("/n Digite o erro:");
 	//scanf("%la",&erro);
 
 
-	A = generateSquareRandomPositiveDefiniteMatrix(N);
-	x = (double*) malloc(N*sizeof(double));
-	b = (double*) malloc(N*sizeof(double));
+	A = generateSquareRandomPositiveDefiniteMatrix(n);
+	retorno = generateRandomDiagonal(n, n, kMax, diag);
+	x = (double*) malloc(n*sizeof(double));
+	b = (double*) malloc(n*sizeof(double));
 
 	double invRandMax = 1.0 / (double)RAND_MAX;
-	for (int i = 0 ; i<N ; ++i){
+	for (int i = 0 ; i<n ; ++i){
 		b[i] = (double)rand()*invRandMax;
 	}
 	
-	imprime_sistema(A,b,N);
+	imprime_sistema(diag,b,n);
 }
 
 
