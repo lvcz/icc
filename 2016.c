@@ -188,25 +188,25 @@ void *GaussSeidel(double *A,double *b,double *x, int n)
 	{	
 	for (int i = 0; i < n; ++i) {
 		
-		x[i] = b[i];
+		x[i] = b[i]/A[i*n+i];
 		
 		for (int j = 0; j < i; ++j) 
 		{
-			x[i] = x[i] -  A[i*n+j] * x[j];
-			
-			 
+			if( j !=i)
+			{				
+			x[i] = x[i] -  (A[i*n+j] * x[j]);
+			}
 		}
 		for (int j = i ; j<n; ++j)
 		{
+			if(j != i)
+			{
 			x[i] = x[i] - A[i*n+j] * x[j];
-			 
+			}
 		}
 		x[i] =x[i] / A[i*n+i];
-		
-		 		
 	}
-	k++;
-	
+	k++;	
 	 
 }while (k<10);
 		return NULL;
