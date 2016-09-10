@@ -183,12 +183,13 @@ void imprime_sistema(double *A, double *b, int n)
 void *GaussSeidel(double *A,double *b,double *x, int n)
 {
 	int k =1;
-	
+	double norma=10;
+	double *x_ant = (double*) malloc(n*sizeof(double));
 	do
 	{	
 	for (int i = 0; i < n; ++i) {
 		
-		x[i] = b[i]/A[i*n+i];
+		x[i] = b[i];
 		
 		for (int j = 0; j < i; ++j) 
 		{
@@ -206,9 +207,20 @@ void *GaussSeidel(double *A,double *b,double *x, int n)
 		}
 		x[i] =x[i] / A[i*n+i];
 	}
-	k++;	
-	 
-}while (k<10);
+	
+	k++;
+	
+	
+	 for (int i = 0; i < n; ++i) {
+		if(k>1)		norma = x_ant[i] - x[i];
+		if (norma <0 ) norma = norma *(-1);
+		x_ant[i]=x[i];
+		printf( "x(%d)= %lf \n", i,x[i]);
+		
+	}
+	printf("\n norma = %lf,n = %d \n", norma, k);
+	
+}while (norma > 0.0d);
 		return NULL;
 }
 
