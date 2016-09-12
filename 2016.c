@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#define M_PI 3.1415926535
+//	#define M_PI 3.1415926535
 
 
 
@@ -193,17 +193,15 @@ void *GaussSeidel(double *A,double *b,double *x, int n)
 		
 		for (int j = 0; j < i; ++j) 
 		{
-			if( j !=i)
-			{				
+							
 			x[i] = x[i] -  (A[i*n+j] * x[j]);
-			}
+			
 		}
 		for (int j = i ; j<n; ++j)
 		{
-			if(j != i)
-			{
+			
 			x[i] = x[i] - A[i*n+j] * x[j];
-			}
+			
 		}
 		x[i] =x[i] / A[i*n+i];
 	}
