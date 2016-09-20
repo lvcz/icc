@@ -224,4 +224,110 @@ void *GaussSeidel(double *A,double *b,double *x, int n)
 		return NULL;
 }
 
-
+/*
+		Calcula metodo do gradiente seguindo o livro.
+*/
+void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int maxIter)
+{
+	double *x_result;
+	if ( ! ( x_result = (double*) malloc(n*sizeof(double))) )return;
+	for (int i = 0 ; i<n ;++i) x_result[i] =0.0d;
+	
+	double *x_ant;
+	if ( ! ( x_ant = (double*) malloc(n*sizeof(double))) )return;
+	for (int i = 0 ; i<n ;++i) x_ant[i] =0.0d;
+	
+	double *r;
+	if ( ! ( r = (double*) malloc(n*sizeof(double))) )return;
+	for (int i = 0 ; i<n ;++i) r[i] =b[i];
+	
+	double *aux;
+	if ( ! ( aux = (double*) malloc(n*sizeof(double))) )return;
+	for (int i = 0 ; i<n ;++i) aux[i] =b[i]*b[i];
+	
+	
+	double *v;
+	if ( ! ( v = (double*) malloc(n*sizeof(double))) )return ;
+	for (int i = 0 ; i<n ;++i) v[i] =b[i];
+	
+	double *z;
+	if ( ! ( z = (double*) malloc(n*sizeof(double))) )return ;
+	for (int i = 0 ; i<n ;++i) z[i] =0.0d;
+	
+	double *s;
+	if ( ! ( s = (double*) malloc(n*sizeof(double))) )return ;
+	for (int i = 0 ; i<n ;++i) s[i] =0.0d;
+	
+	double *aux1;
+	if ( ! ( aux1 = (double*) malloc(n*sizeof(double))) )return ;
+	for (int i = 0 ; i<n ;++i) aux1[i] =0.0d;
+	
+	double *m;
+	if ( ! ( m = (double*) malloc(n*sizeof(double))) )return ;
+	for (int i = 0 ; i<n ;++i) m[i] =0.0d;
+	
+	
+	
+	double norma = 0.0d;
+	
+	int k=0;
+	
+	
+	
+	while( k < maxIter )
+	{	
+		//calcula z	 = A * v
+		for (int i =0; i< n ;++i)
+		{
+			for(int j = 0;j<n;j++)
+			{
+				z[i] += a[i*n+j] * v[j];
+			}			
+		}
+		
+		//calcula  s= aux / v * z		
+		for (int i =0; i< n ;++i)
+		{
+			s[i] = aux[i] / v[i] * z[i];
+		}
+		//calcula x(k+1) = x(k) + s*v
+		for (int i = 0 ; i < n;++i)
+		{
+			x_ant[i] =  x_result[i];
+			x_result[i] +=  + s[i] *v[i];			
+		}
+		norma = 0.0d;
+		//calcula  r = r- sz
+		for (int i = 0 ; i < n;++i)
+		{
+			r[i] -= s[i] * z[i];
+			aux1[i] = r[i] * r[i];
+			norma += aux1[i];
+		}
+		// caso convergiu retorna x-result
+		//if (norma <tol){return;} 
+		
+		//caso não converja
+		// m= aux1/aux; aux = aux1; v = r+m*r
+		
+		for( int i = 0;i<n ;++i){
+			m[i] = aux1[i] / aux[i];
+			aux[i] = aux1[i];
+			
+			v[i] = r[i] + m[i] * r[i];
+			
+		}
+		
+		
+		
+		
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+}
