@@ -58,8 +58,9 @@ void main (int argc, char** argv){
 	double tol;
     FILE *arquivo_saida;
    srand(20162);	
-
-	 if (!strcmp("n", argv[1]))
+	
+	if(argc >1){
+		if (!strcmp("n", argv[1]))
         {
             int aux;
             aux = atoi(argv[2]);
@@ -71,77 +72,65 @@ void main (int argc, char** argv){
           }
         }
 		else {
-            fprintf (stderr, "\nN deve ser n > 0 ");
+            fprintf (stderr, "\nN deve ser maior que 0 ");
             return;
-        }		
-    
-    
-    
-    
-	 for (int i = 3; i < argc; i += 2) {
-    
-       
-    
-        if (!strcmp("-i", argv[i]))
-        {
-            int aux;
-            aux = atoi(argv[i+1]);
-            if (aux > 0) {
-                maxIter = aux;
-            } else {
-                fprintf (stderr, "\n Erro ao definir o numero maximo de iterações.");
-            return ;
-          }
-        } 
-        
-        if (!strcmp("-t", argv[i])) {
-            double aux;
-            aux = atof(argv[i+1]);
-            if (aux > 0 && aux < 1) {
-                tol = aux;
-            } else {
-                fprintf (stderr,"Erro no valor da tolerancia");
-                return ;
-            }
         }
-        
-        if (strcmp("-o",argv[i]) == 0) {
-            arquivo_saida = fopen(argv[i+1], "w");
-            if (arquivo_saida == NULL) {
-                fprintf (stderr,"\nErro no arquivo de saída!\n");
-                return ;  
-            }    
-        }
-    }
-
-	
-	
+		
+		for (int i = 3; i < argc; i += 2) {
+		
+		   
+		
+			if (!strcmp("-i", argv[i]))
+			{
+				int aux;
+				aux = atoi(argv[i+1]);
+				if (aux > 0) {
+					maxIter = aux;
+				} else {
+					fprintf (stderr, "\n Erro ao definir o numero maximo de iterações.");
+				return ;
+			  }
+			} 
+			
+			if (!strcmp("-t", argv[i])) {
+				double aux;
+				aux = atof(argv[i+1]);
+				if (aux > 0 && aux < 1) {
+					tol = aux;
+				} else {
+					fprintf (stderr,"Erro no valor da tolerancia");
+					return ;
+				}
+			}
+			
+			if (strcmp("-o",argv[i]) == 0) {
+				arquivo_saida = fopen(argv[i+1], "w");
+				if (arquivo_saida == NULL) {
+					fprintf (stderr,"\nErro no arquivo de saída!\n");
+					return ;  
+				}    
+			}
+		}
+	}
+	else{
+		 printf ( "\nN deve ser n > 0 ");
+            return;
+	}
 	A = generateSquareRandomPositiveDefiniteMatrix(n);
 	//retorno = generateRandomDiagonal(n, n, kMax, diag);
-	
+
 	x = (double*) malloc(n*sizeof(double));
 	for (int i = 0; i < n; ++i) {
 		x[i] = 0.0;
 	}
 
-	
-
-	//double invRandMax = 1.0 / (double)RAND_MAX;
 	b = calcula_func_b(n);
-	
-	
-	
-	
-	
-	
-	
+
 	imprime_sistema(A,b,n);
-	
+
 	GaussSeidel(A,b,x,n);
 	
-	for (int i = 0; i < n; ++i) {
-		printf( "x(%d)= %lf \n", i,x[i]);
-	}
+
 	
 }
 
