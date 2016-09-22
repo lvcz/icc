@@ -69,7 +69,11 @@ void main (int argc, char** argv){
                 fprintf (stderr, "\nN deve ser n > 0 ");
             return;
           }
-        } 
+        }
+		else {
+            fprintf (stderr, "\nN deve ser n > 0 ");
+            return;
+        }		
     
     
     
