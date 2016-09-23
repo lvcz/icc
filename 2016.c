@@ -125,10 +125,11 @@ void main (int argc, char** argv){
 	do{
 		generateRandomDiagonal(n,i,nBandas,A);
 		++i;
+		
 	}while(i<nBandas+1);
 	
 	for (int i = 0; i < n+(nBandas*n); ++i) {
-		printf( "%d:%lf \n", i,A[i]);
+		printf( "%d:%lf ", i,A[i]);
 		}
 	
 	
