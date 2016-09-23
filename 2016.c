@@ -129,7 +129,7 @@ void main (int argc, char** argv){
 	}while(i<nBandas+1);
 	
 	for (int i = 0; i < n+(nBandas*n); ++i) {
-		printf( "%d:%lf ", i,A[i]);
+		printf( "%d:%lf \n ", i,A[i]);
 		}
 	
 	
@@ -258,12 +258,18 @@ double *aloca_vetor(int n)
     return ret;
 }
 
-void matriz_x_vetor(double *a, double *v,double *z, int n)
+void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 {
 	//z[0]= a[0]*v[0] + a[n]*v[1]
-    for (int i =0; i< n ;++i)
-	{
-				
+    for (int i =0; i< n ;++i){
+		b[i]= a[i] * x[i];
+		
+		for(int k=1; k <= nBandas; ++k){
+			if (i+k < n)
+				b[i] += a[i+k*n] *x[k+i]; 
+			if(i-k >= 0)
+				b[i] += a[(i-k)+(k*n)] +x[i-k];
+		}
 	}
 }
 
@@ -271,7 +277,7 @@ void matriz_x_vetor(double *a, double *v,double *z, int n)
 /*
 		Calcula metodo do gradiente seguindo o livro.
 */
-void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int maxIter)
+void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int maxIter,int nBandas)
 {
 	double *x_result = aloca_vetor(n);
 	
@@ -334,17 +340,5 @@ void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int ma
 			//v[i] = r[i] + m[i] * r[i];
 			
 		}
-		
-		
-		
-		
-		
-		
 	}
-	
-	
-	
-	
-	
-	
 }
