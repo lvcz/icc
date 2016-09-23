@@ -7,35 +7,35 @@
 
 
 double *generateSquareRandomPositiveDefiniteMatrix( unsigned int n );
-int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag );
+int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int nBandas, double *diag );
 void imprime_sistema(double *A, double *b, int n) ;
 double *calcula_func_b(int n);
-void *GaussSeidel(double *A,double *b,double *x, int n);
 double vetorT_x_vetor(double *a, double *b ,int n);
 void copia_vetor(double *a, double *b,int n);
 double *aloca_vetor(int n);
 void matriz_x_vetor(double *a, double *v,double *z, int n);
+double vetor_x_num(double num, double *a,int n);
+
 /***********************
  * N: tamanho do sistema linear
  * k: numero da diagonal, 0 = diagonal principal, 1 = acima/abaixo da diagonal, 2 = ...
- * kMax: numero de bandas do sistema linear
+ * nBandas: numero de bandas do sistema linear
  * diag: vetor para armazenar os valores da diagonal. Deve ser alocado por quem chama a função.
  ***********************/
 
-
-int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, double *diag )
+int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int nBandas, double *diag )
 {
-  if ( !diag || N < 3 || kMax > N/2 || k < 0 || k > kMax )
+  if ( !diag || N < 3 || nBandas > N/2 || k < 0 || k > nBandas )
     return (-1);
 
   /* garante valor dominante para diagonal principal */
-  double fator = (k == 0) ? ((double)(kMax-1)) : (0.0);
+  double fator = (k == 0) ? ((double)(nBandas-1)) : (0.0);
 
   double invRandMax = 1.0 / (double)RAND_MAX;
 
   for (int i=0; i < N-k; ++i)
   {
-    diag[i] = fator + (double)rand() * invRandMax;
+    diag[k*N+i] = fator + (double)rand() * invRandMax;
   }
 
   return (0);
@@ -47,7 +47,7 @@ int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int kMax, d
 void main (int argc, char** argv){
 
 	int n;
-	int kMax = 0;
+	int nBandas = 0;
 	int k = 0;
     int maxIter = 0;
 	//int retorno =0;
@@ -57,7 +57,7 @@ void main (int argc, char** argv){
 	double *x = NULL;
 	double tol;
     FILE *arquivo_saida;
-   srand(20162);	
+	srand(20162);	
 	
 	if(argc >1){
 		if (!strcmp("n", argv[1]))
@@ -84,8 +84,8 @@ void main (int argc, char** argv){
 			{
 				int aux;
 				aux = atoi(argv[i+1]);
-				if (aux > 0) {
-					maxIter = aux;
+				if (aux >= 0) {
+					nBandas = aux;
 				} else {
 					fprintf (stderr, "\n Erro ao definir o numero maximo de iterações.");
 				return ;
@@ -116,19 +116,34 @@ void main (int argc, char** argv){
 		 printf ( "\nN deve ser n > 0 ");
             return;
 	}
-	A = generateSquareRandomPositiveDefiniteMatrix(n);
+	//A = generateSquareRandomPositiveDefiniteMatrix(n);
 	//retorno = generateRandomDiagonal(n, n, kMax, diag);
+	
+	
+	A= aloca_vetor(n+(nBandas*n));
+	int i =0;
+	do{
+		generateRandomDiagonal(n,i,nBandas,A);
+		++i;
+	}while(i<nBandas+1);
+	
+	for (int i = 0; i < n+(nBandas*n); ++i) {
+		printf( "%d:%lf \n", i,A[i]);
+		}
+	
+	
+	
 
-	x = (double*) malloc(n*sizeof(double));
-	for (int i = 0; i < n; ++i) {
-		x[i] = 0.0;
-	}
+	
+	
+	//x = aloca_vetor(n);
+	
 
 	b = calcula_func_b(n);
 
-	imprime_sistema(A,b,n);
+	//imprime_sistema(A,b,n);
 
-	GaussSeidel(A,b,x,n);
+	//GaussSeidel(A,b,x,n);
 	
 
 	
@@ -213,49 +228,6 @@ void imprime_sistema(double *A, double *b, int n)
 }
 
 
-void *GaussSeidel(double *A,double *b,double *x, int n)
-{
-	int k =1;
-	double norma=10;
-	double *x_ant = (double*) malloc(n*sizeof(double));
-	do
-	{	
-	for (int i = 0; i < n; ++i) {
-		
-		x[i] = b[i];
-		
-		for (int j = 0; j < i; ++j) 
-		{
-			if( j !=i)
-			{				
-			x[i] = x[i] -  (A[i*n+j] * x[j]);
-			}
-		}
-		for (int j = i ; j<n; ++j)
-		{
-			if(j != i)
-			{
-			x[i] = x[i] - A[i*n+j] * x[j];
-			}
-		}
-		x[i] =x[i] / A[i*n+i];
-	}
-	
-	k++;
-	
-	
-	 for (int i = 0; i < n; ++i) {
-		if(k>1)		norma = x_ant[i] - x[i];
-		if (norma <0 ) norma = norma *(-1);
-		x_ant[i]=x[i];
-		printf( "x(%d)= %lf \n", i,x[i]);
-		
-	}
-	printf("\n norma = %lf,n = %d \n", norma, k);
-	
-}while (norma > 0.0d);
-		return NULL;
-}
 
 double vetorT_x_vetor(double *a, double *b, int n)
 {
@@ -264,6 +236,11 @@ double vetorT_x_vetor(double *a, double *b, int n)
         aux +=a[i]*b[i];
     
     return aux;
+}
+double vetor_x_num(double num, double *a,int n)
+{
+	for (int i = 0 ; i<n ;++i)
+        a[i] = a[i]*num;
 }
 
 void copia_vetor(double *a, double *b,int n)
@@ -282,12 +259,10 @@ double *aloca_vetor(int n)
 
 void matriz_x_vetor(double *a, double *v,double *z, int n)
 {
+	//z[0]= a[0]*v[0] + a[n]*v[1]
     for (int i =0; i< n ;++i)
 	{
-		for(int j = 0;j<n;j++)
-		{
-			z[i] += a[i*n+j] * v[j];
-		}			
+				
 	}
 }
 
@@ -316,7 +291,7 @@ void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int ma
 	double m = 0.0d;
 	
 	double norma = 0.0d;
-	
+	double v_x_z=0.0d;
 	int k=0;
 	
 	
@@ -326,17 +301,17 @@ void metodo_gradiente(double *a, double *b, double *x, int n, double tol, int ma
 		//calcula z	 = A * v
 		matriz_x_vetor(a,v,z,n);
 		
-		//calcula  s= aux / v * z		
-		for (int i =0; i< n ;++i)
-		{
-			//s[i] = aux[i] / v[i] * z[i];
-		}
-		//calcula x(k+1) = x(k) + s*v
-		for (int i = 0 ; i < n;++i)
-		{
-			//x_ant[i] =  x_result[i];
-			//x_result[i] +=  + s[i] *v[i];			
-		}
+		//calcula  s= aux / v * z	
+		
+		v_x_z = vetorT_x_vetor(v,z,n);	
+		
+		s=aux/v_x_z;
+		
+		//calcula x(k+1) = x(k) + s*v		
+		copia_vetor(x_ant,x_result,n);
+		vetor_x_num(s,x_result,n);
+		//
+		
 		norma = 0.0d;
 		//calcula  r = r- sz
 		for (int i = 0 ; i < n;++i)
