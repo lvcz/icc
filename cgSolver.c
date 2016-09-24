@@ -361,6 +361,10 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 			*timeMax=timediff;
 			
 		}
+		for (int i = 0 ; i<n;++i){
+		printf("# A[%d]: %lf",i,x_result[i]);
+		
+		}
 	}
 	
 	return k;
