@@ -212,8 +212,8 @@ void main (int argc, char** argv){
             return;
 	}
 	if(maxIter==0) maxIter = n;	
-	double *erro = aloca_vetor(n);
-	double *v_norma = aloca_vetor(n);
+	double *erro = aloca_vetor(maxIter);
+	double *v_norma = aloca_vetor(maxIter);
 	nBandas=((nBandas - 1)/2);
   
     
@@ -224,7 +224,7 @@ void main (int argc, char** argv){
 	}
 	
 	b = calcula_func_b(n);
-	double timeMin=10.0d;
+	double timeMin=1000000.0d;
 	double timeMax=0.0d;
 	double *x_result = aloca_vetor(n);
 	double timeini = timestamp();	
