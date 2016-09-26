@@ -6,7 +6,7 @@
 #define M_PI 3.1415926535
 
 	
-
+int IsMaxIter=0;
 
 int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result,double *timeResMin,double *timeResMax,double *timeResMedio);
 void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timeMin,double timeMax,double timemedio,int n,double *x,double timeResMin, double timeResMax, double timeResMedio);
@@ -190,6 +190,7 @@ void main (int argc, char** argv){
 				aux = atof(argv[i+1]);
 				if (aux > 0 && aux < 1) {
 					tol = aux;
+					
 				} else {
 					fprintf (stderr," \n Erro no valor da tolerancia\n");
 					return ;
@@ -210,7 +211,7 @@ void main (int argc, char** argv){
 		 fprintf (stderr, "\n Uso: cgSolver n nBandas -i <maxIter> -t <tolerancia> -o <arquivo_saida>   \n");
             return;
 	}
-	if(maxIter==0) maxIter = n;
+	if(maxIter==0) maxIter = n;	
 	double *erro = aloca_vetor(n);
 	double *v_norma = aloca_vetor(n);
 	nBandas=((nBandas - 1)/2);
@@ -249,7 +250,8 @@ void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,doubl
 	fprintf(arquivo_saida,"# Tempo Resíduo: %.14g %.14g %.14g \n" ,timeResMin,timeResMedio,timeResMax);
 	fprintf(arquivo_saida,"#\n");
 	fprintf(arquivo_saida,"# Norma Euclidiana do Residuo e Erro aproximado\n");
-	for( int i = 0; i < k ; ++i)
+	k= IsMaxIter? k++:k;
+	for( int i = 0; i <= k ; ++i)
 	{
 		fprintf(arquivo_saida,"# i=%d: %.14g %.14g \n" ,i, v_norma[i],erro[i]);
 	}
@@ -339,8 +341,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		// caso convergiu retorna x-result
 		
 		if (erro[k] <tol){
-			
-            
+			IsMaxIter=1;            
             return k;
 		} 
 		// m=aux1/aux; aux =aux1;	
