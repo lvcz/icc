@@ -1,0 +1,101 @@
+Leia-Me Trabalho 1 - CI 164
+Autoria: 
+André de Mello Boeira GRR20106029
+Leonardo Vinicius Carvalho Zanella GRR20103241
+
+Arquivos existentes:
+
+cgSolver.c
+
+	Programa desenvolvido para resolução de sistemas lineares gerados aleatoriamente com base nos parâmetros passados para execução (n:dimensão do Sistema Linear; nBandas:número de bandas da matriz A; -i maxIter: número máximo de iterações a serem executadas; -t tolerancia: erro aproximado absoluto máximo, considerando a norma Euclidiana do resíduo; -o arquivo_saida) . 
+
+	O programa gera uma matriz de banda, simétrica e definida positiva e a aloca em um vetor. Calcula a função especificada para b e gera os valores do vetor de resultado do sistema linear Ax = b.
+Para resolver o sistema linear, implementamos o método do gradiente conjugado seguindo o livro da Maria Cristina C. Cunha.  
+
+Makefile
+
+    Arquivo para compilação, comando all (compila) e clean (remove).
+
+Estruturas de dados
+
+	Matriz A = Vetor de tamanho n + (nBandas*n); Contém os valores da matriz A, os quais são gerados por diagonais pela função dada pelo professor, a alocação dos elementos da diagonal é feita sequencialmente no vetor(A[0..(n-1)] = diagonal, A[n..(2n-2)] diagonal 1 (simetria garante que não precisa dos valores da diagonal abaixo)).   
+
+	x_result = Vetor de tamanho n com o resultado dos valores de x na ultima iteração.
+
+	b = vetor de tamanho n, calculado no inicio de acordo com a função dada.
+
+Algoritmos
+
+int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result);
+
+	É a função principal onde o sistema linear Ax=b é resolvido pelo método do gradiente conjugado.
+	É execuda até que o erro seja menor que a tolerância ou o número máximo de iterações.
+	Primeiro faz a multiplicação da matriz A pelo vetor v, que na primera iteração contém os valores de b, e salva o resultado no vetor z.
+	Depois multiplicamos esse vetor z por v novamente e atribui esse valor a um número v_x_z
+	Calcula um valor s = aux (soma dos quadrados de b) / v_x_z (escalar resultante do produto de z por v)	
+	Salva o valor calculado para x na variavel x_ant 
+	Calcula o valor x da iteração atual = x_ant + s * v
+	Calcula o resíduo r = r - sz
+	Calcula a soma dos quadrados do vetor r e salva em aux1
+	atribui norma_ant = norma 
+	Calcula a nova norma = raiz quadrada de aux1
+	Salva a norma da iteração no vetor de normas
+	Calcula o erro da iteração fazendo a diferença absoluta entre as normas anterior e atual
+	Caso erro seja menor que a tolerancia retorna a iteração em que encontrou a solução
+	Calcula um multiplicador m = aux1 / aux 
+	Os elementos de r são multicados por m e somados ao própio r, r= r+r*m e esse é o novo v
+	
+
+int generateRandomDiagonal(unsigned int N, unsigned int k, unsigned int nBandas, double *diag );
+
+	Gera diagonal para a matriz A. É executado nBandas vezes para gerar cada uma das diagonais. Os valores da diagonal são alocados sequencialmente.  
+
+double timestamp();
+
+	Medição de tempo.
+
+double *calcula_func_b(int n);
+
+	Função que calcula o valor de b de acordo com a especificação. 
+
+	f(x) = 4π² ( sin(2πx) + sin(2π(π-x)) )
+
+double vetorT_x_vetor(double *a, double *b ,int n);
+
+	Como o resultado é um número, declaramos um double aux e fazemos o mesmo receber as multiplicações dos elementos de aux+=a[i]*b[i] e somamos. 
+
+void copia_vetor(double *a, double *b,int n);
+
+	Copia os valores do vetor b no vetor no vetor a.
+
+double *aloca_vetor(int n);
+
+	Aloca vetor de tamanho n.
+
+void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas);
+
+	Efetua o o calculo dos elementos da matriz a pelo. 
+
+double vetor_x_num(double num, double *a,int n);
+
+	Multiplica todos os elementos de um vetor por um número.
+
+void vetor_mais_vetor(double *a, double *b, double *res, int n);
+
+	Faz a soma dos vetores a e b e retorna no vetor resultado.
+
+void vetor_menos_vetor(double *a, double *b, double *res, int n)
+
+	Faz a subtração dos vetores a e b e retorna no vetor resultado.
+
+void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timemin,double timemax,double timemedio,int n,double *x);
+
+	Imprime, de acordo com a formatação solicitada, o tempo de execução do método do gradiente <min> <med> <max>, tempo do cálculo do resíduo <min> <med> <max>, e para cada iteração <norma> <erro>, após isso o tamanho do sistema linear e os valores de X na ultima iteração.
+
+Bugs conhecidos:
+
+Algum valor esta acontecendo algum erro numerico que esta fazendo que quando o metodo alcança valores pequenos as proximas iterações as vezes aumentem de valor da norma euclidiana e mas o erro permaneça baixo(embora altere em quedas e subidas),
+esse bug acontece em valores pequenos com alto numero de iterações e não acontece com matrizes grandes e varias iterações.
+
+
+

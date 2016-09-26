@@ -8,7 +8,8 @@
 	
 
 
-int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result);
+int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result,double *timeResMin,double *timeResMax,double *timeResMedio);
+void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timeMin,double timeMax,double timemedio,int n,double *x,double timeResMin, double timeResMax, double timeResMedio);
 int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int nBandas, double *diag );
 double timestamp();
 double *calcula_func_b(int n);
@@ -18,7 +19,8 @@ double *aloca_vetor(int n);
 void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas);
 double vetor_x_num(double num, double *a,int n);
 void vetor_mais_vetor(double *a, double *b, double *res, int n);
-void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timemin,double timemax,double timemedio,int n,double *x);
+void vetor_menos_vetor(double *a, double *b, double *res, int n);
+
 
 
 /***********************
@@ -45,6 +47,7 @@ int generateRandomDiagonal( unsigned int N, unsigned int k, unsigned int nBandas
 
   return (0);
 }
+
 double timestamp(void){
     struct timeval tp;
     gettimeofday(&tp, NULL);
@@ -72,6 +75,7 @@ double *calcula_func_b(int n)
 		
 	return (bx);
 }
+
 double vetorT_x_vetor(double *a, double *b, int n)
 {
     double aux =0.0d;
@@ -79,11 +83,13 @@ double vetorT_x_vetor(double *a, double *b, int n)
         aux +=a[i]*b[i];    
     return aux;
 }
+
 double vetor_x_num(double num, double *a,int n)
 {
 	for (int i = 0 ; i<n ;++i)
         a[i] = a[i]*num;
 }
+
 void vetor_mais_vetor(double *a, double *b, double *res, int n){
 	
 for (int i = 0 ; i<n ;++i) 
@@ -115,13 +121,19 @@ void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 	
     for (int i =0; i< n ;++i){
 		b[i]= a[i] * x[i];
-		
+		//printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
+        
 		for(int k=1; k <= nBandas; ++k){
-			if (i+k < n)
+			if (i+k < n){
 				b[i] += a[i+k*n] *x[k+i]; 
-			if(i-k >= 0)
+                //printf(" a[%d] * x[%d] +", i+k*n,k+i);
+            }
+			if(i-k >= 0){
 				b[i] += a[(i-k)+(k*n)] +x[i-k];
+                //printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
+            }
 		}
+        // printf(")\n");
 	}
 }
 
@@ -134,37 +146,29 @@ void main (int argc, char** argv){
 	int k = 0;
     int maxIter = 0;
 	double *A = NULL; 
-	double *diag = NULL;
 	double *b = NULL;
-	double *x = NULL;
 	double tol;	
     FILE *arquivo_saida;
 	srand(20162);	
 	
 	if(argc >2){
 		
-            int aux;
-            aux = atoi(argv[1]);
-            if (aux > 0 ) {
-                n = aux;
-            } else {
-                fprintf (stderr, "\nN deve ser n > 0 ");
-            return;
-			}
-				aux = atoi(argv[2]);
-				if (aux >= 0) {
-					nBandas = aux;
-				} else {
-					fprintf (stderr, "\n Erro ao definir o número de Bandas.");
-				return ;
-				if (nBandas > n/2)
-				{
-					fprintf (stderr, "\n Erro ao definir o número maximo de .");
-				return ;
-				}	
-			}
+        int aux;
+        aux = atoi(argv[1]);
+        if (aux > 0 ) {
+            n = aux;
+        } else {
+            fprintf (stderr, "\nN deve ser n > 0 ");
+        return;
+        }
+        aux = atoi(argv[2]);
+        if (aux > 0 && aux % 2==1 && aux< n/2 ) {
+            nBandas =(int) aux;
+        } else {
+            fprintf (stderr, "\n Erro ao definir o número de Bandas( 0 < nBandas  <  n/2,  nBandas deve ser impar). \n");
+        return ;
+        }
         
-				
 		for (int i = 3; i < argc; i += 2) {
 		
 		   
@@ -173,10 +177,10 @@ void main (int argc, char** argv){
 			{
 				int aux;
 				aux = atoi(argv[i+1]);
-				if (aux >= 0) {
+				if (aux >= 0 ) {
 					maxIter = aux;
 				} else {
-					fprintf (stderr, "\n Erro ao definir o número maximo de iterações.");
+					fprintf (stderr, "\n Erro ao definir o número maximo de iterações.\n");
 				return ;
 			  }
 			} 
@@ -187,7 +191,7 @@ void main (int argc, char** argv){
 				if (aux > 0 && aux < 1) {
 					tol = aux;
 				} else {
-					fprintf (stderr," \n Erro no valor da tolerancia");
+					fprintf (stderr," \n Erro no valor da tolerancia\n");
 					return ;
 				}
 			}
@@ -203,70 +207,62 @@ void main (int argc, char** argv){
 		}
 	}
 	else{
-		 fprintf (stderr, "\n N deve ser n > 0 e nBandas < n/2 \n");
+		 fprintf (stderr, "\n Uso: cgSolver n nBandas -i <maxIter> -t <tolerancia> -o <arquivo_saida>   \n");
             return;
 	}
 	if(maxIter==0) maxIter = n;
 	double *erro = aloca_vetor(n);
 	double *v_norma = aloca_vetor(n);
-	
-		
+	nBandas=((nBandas - 1)/2);
+  
+    
 	A= aloca_vetor(n+(nBandas*n));
-	int i =0;
-	do{
-		generateRandomDiagonal(n,i,nBandas,A);
-		++i;
-		
-	}while(i<nBandas+1);
 	
-	
-	for (int i = 0 ; i<n+(nBandas*n);++i){
-		printf("# A[%d]: %lf",i,A[i]);
-		
+	for( int i =0; i <= nBandas; ++i){
+		generateRandomDiagonal(n,i,(nBandas+1)*2,A);
 	}
 	
-	
 	b = calcula_func_b(n);
-	double timeMin=1.0d;
+	double timeMin=10.0d;
 	double timeMax=0.0d;
-	
-		double *x_result = aloca_vetor(n);
-	double timeini = timestamp();
-	
-	k = metodo_gradiente(A,b,n,tol,maxIter,nBandas,v_norma,erro,&timeMin,&timeMax,x_result);
+	double *x_result = aloca_vetor(n);
+	double timeini = timestamp();	
+    double timeResMin; 
+    double timeResMax;
+    double timeResMedio;
+	k = metodo_gradiente(A,b,n,tol,maxIter,nBandas,v_norma,erro,&timeMin,&timeMax,x_result,&timeResMin,&timeResMax,&timeResMedio);
 	double timefim = timestamp();
 	
 	double timemedio= (timefim-timeini)/k;
-	
-	imprime_saida(arquivo_saida,k ,v_norma,erro,timeMin,timeMax,timemedio,n,x_result);
+	timeResMedio=timeResMedio/k;
+	imprime_saida(arquivo_saida,k ,v_norma,erro,timeMin,timeMax,timemedio,n,x_result,timeResMin,timeResMax,timeResMedio);
 
+    //free()
+   
 	
 }
-void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timeMin,double timeMax,double timemedio,int n,double *x){
+
+void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timeMin,double timeMax,double timemedio,int n,double *x,double timeResMin, double timeResMax, double timeResMedio){
 	
 	fprintf(arquivo_saida,"###########\n");
-	fprintf(arquivo_saida,"# Tempo Método CG: %lf %lf %lf \n" ,timeMin,timemedio,timeMax);
-	fprintf(arquivo_saida,"#falta residuo \n");
+	fprintf(arquivo_saida,"# Tempo Método CG: %.14g %.14g %.14g \n" ,timeMin,timemedio,timeMax);
+	fprintf(arquivo_saida,"# Tempo Resíduo: %.14g %.14g %.14g \n" ,timeResMin,timeResMedio,timeResMax);
 	fprintf(arquivo_saida,"#\n");
 	fprintf(arquivo_saida,"# Norma Euclidiana do Residuo e Erro aproximado\n");
 	for( int i = 0; i < k ; ++i)
 	{
-		fprintf(arquivo_saida,"# i=%d: %lf %lf \n" ,i, v_norma[i],erro[i]);
+		fprintf(arquivo_saida,"# i=%d: %.14g %.14g \n" ,i, v_norma[i],erro[i]);
 	}
 	fprintf(arquivo_saida,"###########\n");
 	fprintf(arquivo_saida,"%d\n",n);
 	for( int i = 0; i < n ; ++i)
 	{
-		fprintf(arquivo_saida,"%lf " ,x[i]);
+		fprintf(arquivo_saida,"%.14g " ,x[i]);
 	}
 	
 }
 
-
-/*
-		Calcula metodo do gradiente seguindo o livro.
-*/
-int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result)
+int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result,double *timeResMin,double *timeResMax,double *timeResMedio)
 {
 	
 	
@@ -278,6 +274,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
     copia_vetor(v,b,n);	
 	double *z = aloca_vetor(n);	
 	double *mr = aloca_vetor(n);	
+	double *sv = aloca_vetor(n);	
 	
 	
 	double s = 0.0d;	
@@ -291,39 +288,48 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 	{	
 		double timeIni = timestamp();
 		
-		//calcula z	 = A * v
-		matriz_x_vetor(a,v,z,n,nBandas);
+		
+        //calcula z	 = A * v
+		  
+       
+        matriz_x_vetor(a,v,z,n,nBandas);
 
 		//calcula  s= aux / v * z	
-		//
+
 		v_x_z = vetorT_x_vetor(v,z,n);	
-		s = aux/v_x_z;
-		//
-
-
-		//calcula x(k+1) = x(k) + s*v		
-		//
-		copia_vetor(x_ant,x_result,n);		
+            s = aux/v_x_z;   
 		
-		vetor_x_num(s,v,n);		
-		vetor_mais_vetor(x_result,v,x_result,n);
 
+        //
+    	//calcula x(k+1) = x(k) + s*v		
 		//
-
+        copia_vetor(x_ant,x_result,n);		
+		copia_vetor(sv,v,n);
+        vetor_x_num(s,sv,n);	
+        vetor_mais_vetor(x_result,sv,x_result,n);
+        //
 		norma = 0.0d;
-		//calcula  r = r- sz
-		vetor_x_num(s,z,n);
-		vetor_menos_vetor(r,z,r,n);
-
-		//aux1= r*r
+		double timeIniRes= timestamp();
+        //calcula  r = r- sz
+		
+        vetor_x_num(s,z,n);
+        vetor_menos_vetor(r,z,r,n);         
+        
+        //for (int i = 0; i<n ;++i){
+         //   printf("z[%d]=%.14g r[%d]=%.14g \n",i,z[i],i,r[i]);
+        //}
+        
+		//aux1= r*r        
+        
 		aux1 = vetorT_x_vetor(r,r,n);
 		
 		norma_ant= norma;
 		
 		norma = sqrt(aux1);
 		v_norma[k]=norma;
-	
+        double timeFimRes =timestamp();
 		
+        
 		if (k>0){
 			erro[k] = fabs(v_norma[k] - v_norma[k-1]);
 		}
@@ -333,12 +339,14 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		// caso convergiu retorna x-result
 		
 		if (erro[k] <tol){
-			return k;
-			} 
 			
-		m = aux1 / aux;
+            
+            return k;
+		} 
+		// m=aux1/aux; aux =aux1;	
+        m = aux1 / aux;
 		aux = aux1;
-
+      
 		// v = r+m*r
 		copia_vetor(mr,r,n);
 		vetor_x_num(m,mr,n);
@@ -348,25 +356,41 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		
 		double timeFim =timestamp();
 		
+        double timeResdiff= timeFimRes-timeIniRes;
+        
+        
 		double timediff= timeFim-timeIni;
-		
-		if( timediff < *timeMin){
+		// iteracao
+        *timeResMedio += timeResdiff;
+		if( timediff <= *timeMin){
 			
 			*timeMin = timediff;
 			
 			}
 			
-		if(timediff > *timeMax){
+		if(timediff >= *timeMax){
 			
 			*timeMax=timediff;
 			
 		}
-		for (int i = 0 ; i<n;++i){
-		printf("# A[%d]: %lf",i,x_result[i]);
-		
+        
+        //res
+        if( timeResdiff <= *timeMin){
+			
+			*timeResMin = timeResdiff;
+			
+			}
+			
+		if(timeResdiff >= *timeResMax){
+			
+			*timeResMax=timeResdiff;
+			
 		}
+        
+        
+		
 	}
-	
+           
 	return k;
 }
 
