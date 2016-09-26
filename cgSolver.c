@@ -251,7 +251,7 @@ void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,doubl
 	fprintf(arquivo_saida,"#\n");
 	fprintf(arquivo_saida,"# Norma Euclidiana do Residuo e Erro aproximado\n");
 	k= IsMaxIter? k++:k;
-	for( int i = 0; i <= k ; ++i)
+	for( int i = 0; i < k ; ++i)
 	{
 		fprintf(arquivo_saida,"# i=%d: %.14g %.14g \n" ,i, v_norma[i],erro[i]);
 	}
