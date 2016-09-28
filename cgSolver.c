@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <sys/time.h>
+#include <float.h>
 #define M_PI 3.1415926535
 
 	
@@ -121,19 +122,19 @@ void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 	
     for (int i =0; i< n ;++i){
 		b[i]= a[i] * x[i];
-		//printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
+		printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
         
 		for(int k=1; k <= nBandas; ++k){
 			if (i+k < n){
 				b[i] += a[i+k*n] *x[k+i]; 
-                //printf(" a[%d] * x[%d] +", i+k*n,k+i);
+                printf(" a[%d] * x[%d] +", i+k*n,k+i);
             }
 			if(i-k >= 0){
 				b[i] += a[(i-k)+(k*n)] +x[i-k];
-                //printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
+				printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
             }
 		}
-        // printf(")\n");
+         printf(")\n");
 	}
 }
 
@@ -273,6 +274,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 	double aux = vetorT_x_vetor(b,b,n);
     double aux1 = 0.0d;    
 	double *v= aloca_vetor(n);
+    copia_vetor(r,b,n);
     copia_vetor(v,b,n);	
 	double *z = aloca_vetor(n);	
 	double *mr = aloca_vetor(n);	
@@ -282,10 +284,11 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 	double s = 0.0d;	
 	double m = 0.0d;
 	double norma = 0.0d;
-	double norma_ant = 0.0d;
+	//double norma_ant = 0.0d;
 	
 	double v_x_z=0.0d;
 	int k=0;
+	
 	while( k < maxIter )
 	{	
 		double timeIni = timestamp();
@@ -299,8 +302,18 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		//calcula  s= aux / v * z	
 
 		v_x_z = vetorT_x_vetor(v,z,n);	
-            s = aux/v_x_z;   
-		
+         
+        if (( v_x_z < FLT_EPSILON ) || (v_x_z > FLT_EPSILON))
+		{
+			printf("aux %.14g /v_x_z %.14g \n", aux, v_x_z);
+			s = aux / v_x_z;
+			printf("S = %.14g \n", s);
+		}
+		else
+		{
+			fprintf(stderr,"Divisao por 0");
+			return 0;
+		}
 
         //
     	//calcula x(k+1) = x(k) + s*v		
@@ -308,30 +321,37 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
         copia_vetor(x_ant,x_result,n);		
 		copia_vetor(sv,v,n);
         vetor_x_num(s,sv,n);	
-        vetor_mais_vetor(x_result,sv,x_result,n);
+        vetor_mais_vetor(x_ant,sv,x_result,n);
         //
-		norma = 0.0d;
+		//norma = 0.0d;
 		double timeIniRes= timestamp();
         //calcula  r = r- sz
 		
         vetor_x_num(s,z,n);
         vetor_menos_vetor(r,z,r,n);         
         
-        //for (int i = 0; i<n ;++i){
-         //   printf("z[%d]=%.14g r[%d]=%.14g \n",i,z[i],i,r[i]);
-        //}
+        for (int i = 0; i<n ;++i){
+            printf("z[%d]=%.14g r[%d]=%.14g \n",i,z[i],i,r[i]);
+        }
         
 		//aux1= r*r        
         
-		aux1 = vetorT_x_vetor(r,r,n);
+        aux1 = vetorT_x_vetor(r,r,n);
 		
-		norma_ant= norma;
+		if (k == 0){
+			// aux na primeira iteracao contem b² = r² originial e nao modificado 
+			norma = sqrt(aux);
+		}
+		else 
+		{		
+			//norma_ant = norma;
+			norma = sqrt(aux1);			
+		}
 		
-		norma = sqrt(aux1);
-		v_norma[k]=norma;
+        v_norma[k]=norma;	
+
         double timeFimRes =timestamp();
 		
-        
 		if (k>0){
 			erro[k] = fabs(v_norma[k] - v_norma[k-1]);
 		}
@@ -345,13 +365,24 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
             return k;
 		} 
 		// m=aux1/aux; aux =aux1;	
+        
+
         m = aux1 / aux;
+		printf("m %.14g  = aux1 %.14g / aux %.14g \n", m,aux1,aux);
 		aux = aux1;
+		
+		
       
 		// v = r+m*r
 		copia_vetor(mr,r,n);
-		vetor_x_num(m,mr,n);
+		vetor_x_num(m,mr,n);	
 		vetor_mais_vetor(r,mr,v,n);
+		for(int i = 0; i < n; ++i){
+			printf("v_result[%d] = %.14g - \n", i, v[i]);
+			}
+		printf("\n");
+		printf("\n");
+		printf("\n");
 		k++;
 		
 		
@@ -394,4 +425,3 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
            
 	return k;
 }
-
