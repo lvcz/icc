@@ -18,7 +18,7 @@ double vetorT_x_vetor(double *a, double *b ,int n);
 void copia_vetor(double *a, double *b,int n);
 double *aloca_vetor(int n);
 void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas);
-double vetor_x_num(double num, double *a,int n);
+void vetor_x_num(double num, double *a,int n);
 void vetor_mais_vetor(double *a, double *b, double *res, int n);
 void vetor_menos_vetor(double *a, double *b, double *res, int n);
 
@@ -59,7 +59,7 @@ double *calcula_func_b(int n)
 {
 	
 	double pi4 = 4 * ( M_PI * M_PI);
-	
+	double pi2= (2 * M_PI);
 	 
 	double *bx = NULL; 
 	if ( ! ( bx = (double*) malloc(n*sizeof(double))) )
@@ -70,7 +70,7 @@ double *calcula_func_b(int n)
 		{ 
 			
 			double x = (i* M_PI/n);
-			bx[i] = pi4 * (sin ( 2 * M_PI * x) + sin ( 2* M_PI *(M_PI - x)));
+			bx[i] = pi4 * (sin ( pi2 * x) + sin ( pi2 *(M_PI - x)));
 		
 		}
 		
@@ -85,7 +85,7 @@ double vetorT_x_vetor(double *a, double *b, int n)
     return aux;
 }
 
-double vetor_x_num(double num, double *a,int n)
+void vetor_x_num(double num, double *a,int n)
 {
 	for (int i = 0 ; i<n ;++i)
         a[i] = a[i]*num;
@@ -122,19 +122,19 @@ void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 	
     for (int i =0; i< n ;++i){
 		b[i]= a[i] * x[i];
-		printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
+		//printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
         
 		for(int k=1; k <= nBandas; ++k){
 			if (i+k < n){
 				b[i] += a[i+k*n] *x[k+i]; 
-                printf(" a[%d] * x[%d] +", i+k*n,k+i);
+                //printf(" a[%d] * x[%d] +", i+k*n,k+i);
             }
 			if(i-k >= 0){
-				b[i] += a[(i-k)+(k*n)] +x[i-k];
-				printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
+				b[i] += a[(i-k)+(k*n)] *x[i-k];
+				//printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
             }
 		}
-         printf(")\n");
+         //printf(")\n");
 	}
 }
 
@@ -148,7 +148,7 @@ void main (int argc, char** argv){
     int maxIter = 0;
 	double *A = NULL; 
 	double *b = NULL;
-	double tol;	
+	double tol=0.0d;	
     FILE *arquivo_saida;
 	srand(20162);	
 	
@@ -212,7 +212,7 @@ void main (int argc, char** argv){
 		 fprintf (stderr, "\n Uso: cgSolver n nBandas -i <maxIter> -t <tolerancia> -o <arquivo_saida>   \n");
             return;
 	}
-	if(maxIter==0) maxIter = n;	
+	maxIter = maxIter==0? maxIter = n:maxIter;	
 	double *erro = aloca_vetor(maxIter);
 	double *v_norma = aloca_vetor(maxIter);
 	nBandas=((nBandas - 1)/2);
@@ -251,7 +251,7 @@ void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,doubl
 	fprintf(arquivo_saida,"# Tempo Resíduo: %.14g %.14g %.14g \n" ,timeResMin,timeResMedio,timeResMax);
 	fprintf(arquivo_saida,"#\n");
 	fprintf(arquivo_saida,"# Norma Euclidiana do Residuo e Erro aproximado\n");
-	k= IsMaxIter? k++:k;
+	k = IsMaxIter=!0? k++:k;
 	for( int i = 0; i < k ; ++i)
 	{
 		fprintf(arquivo_saida,"# i=%d: %.14g %.14g \n" ,i, v_norma[i],erro[i]);
@@ -270,12 +270,18 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 	
 	
 	double *x_ant = aloca_vetor(n);	
+	//r=b
+	double *v= aloca_vetor(n);
+	copia_vetor(v,b,n);	
+	
+	//r=b
 	double *r = aloca_vetor(n);	
+	copia_vetor(r,b,n);
+	
 	double aux = vetorT_x_vetor(b,b,n);
     double aux1 = 0.0d;    
-	double *v= aloca_vetor(n);
-    copia_vetor(r,b,n);
-    copia_vetor(v,b,n);	
+    
+    
 	double *z = aloca_vetor(n);	
 	double *mr = aloca_vetor(n);	
 	double *sv = aloca_vetor(n);	
@@ -291,29 +297,22 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 	
 	while( k < maxIter )
 	{	
-		double timeIni = timestamp();
-		
-		
-        //calcula z	 = A * v
-		  
-       
+		double timeIni = timestamp();		
+        //calcula z	 = A * v       
         matriz_x_vetor(a,v,z,n,nBandas);
 
 		//calcula  s= aux / v * z	
 
 		v_x_z = vetorT_x_vetor(v,z,n);	
          
-        if (( v_x_z < FLT_EPSILON ) || (v_x_z > FLT_EPSILON))
-		{
-			printf("aux %.14g /v_x_z %.14g \n", aux, v_x_z);
+        
+			
 			s = aux / v_x_z;
-			printf("S = %.14g \n", s);
-		}
-		else
-		{
-			fprintf(stderr,"Divisao por 0");
-			return 0;
-		}
+			
+		
+			//fprintf(stderr,"Divisao por 0");
+			//return k;
+		
 
         //
     	//calcula x(k+1) = x(k) + s*v		
@@ -330,9 +329,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
         vetor_x_num(s,z,n);
         vetor_menos_vetor(r,z,r,n);         
         
-        for (int i = 0; i<n ;++i){
-            printf("z[%d]=%.14g r[%d]=%.14g \n",i,z[i],i,r[i]);
-        }
+        
         
 		//aux1= r*r        
         
@@ -360,15 +357,18 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		}	
 		// caso convergiu retorna x-result
 		
-		if (erro[k] <tol){
-			IsMaxIter=1;            
-            return k;
-		} 
+		if(tol>0.0d){
+			if (erro[k] - tol < DBL_EPSILON){  
+				printf("saidacom tol  %.14g erro:%.14g tol: %.14g DBLEPS:%.14g " ,(erro[k] -tol),erro[k],tol,DBL_EPSILON);
+				IsMaxIter=1;            
+				return k;
+			} 
+		}
 		// m=aux1/aux; aux =aux1;	
         
 
         m = aux1 / aux;
-		printf("m %.14g  = aux1 %.14g / aux %.14g \n", m,aux1,aux);
+		
 		aux = aux1;
 		
 		
@@ -377,12 +377,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		copia_vetor(mr,r,n);
 		vetor_x_num(m,mr,n);	
 		vetor_mais_vetor(r,mr,v,n);
-		for(int i = 0; i < n; ++i){
-			printf("v_result[%d] = %.14g - \n", i, v[i]);
-			}
-		printf("\n");
-		printf("\n");
-		printf("\n");
+		
 		k++;
 		
 		
