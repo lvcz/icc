@@ -7,7 +7,7 @@
 #define M_PI 3.1415926535
 
 	
-int IsMaxIter=0;
+
 
 int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nBandas,double *v_norma,double *erro, double *timeMin,double *timeMax,double *x_result,double *timeResMin,double *timeResMax,double *timeResMedio);
 void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,double timeMin,double timeMax,double timemedio,int n,double *x,double timeResMin, double timeResMax, double timeResMedio);
@@ -126,11 +126,11 @@ void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
         
 		for(int k=1; k <= nBandas; ++k){
 			if (i+k < n){
-				b[i] += a[i+k*n] *x[k+i]; 
+				b[i] += a[i+k*n] * x[k+i]; 
                 //printf(" a[%d] * x[%d] +", i+k*n,k+i);
             }
 			if(i-k >= 0){
-				b[i] += a[(i-k)+(k*n)] *x[i-k];
+				b[i] += a[(i-k) + (k*n)] * x[i-k];
 				//printf(" a[%d] * x[%d] ", (i-k)+(k*n),i-k);
             }
 		}
@@ -251,7 +251,7 @@ void imprime_saida(FILE *arquivo_saida,int k ,double *v_norma,double *erro,doubl
 	fprintf(arquivo_saida,"# Tempo Resíduo: %.14g %.14g %.14g \n" ,timeResMin,timeResMedio,timeResMax);
 	fprintf(arquivo_saida,"#\n");
 	fprintf(arquivo_saida,"# Norma Euclidiana do Residuo e Erro aproximado\n");
-	k = IsMaxIter=!0? k++:k;
+	
 	for( int i = 0; i < k ; ++i)
 	{
 		fprintf(arquivo_saida,"# i=%d: %.14g %.14g \n" ,i, v_norma[i],erro[i]);
@@ -304,13 +304,16 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		//calcula  s= aux / v * z	
 
 		v_x_z = vetorT_x_vetor(v,z,n);	
-         
-        
-			
+
+		if (v_x_z < DBL_EPSILON || v_x_z > DBL_EPSILON )
 			s = aux / v_x_z;
+		else{
+			fprintf(stderr,"Divisao por 0");
+			return k;
+		}
 			
 		
-			//fprintf(stderr,"Divisao por 0");
+			//
 			//return k;
 		
 
@@ -358,16 +361,19 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		// caso convergiu retorna x-result
 		
 		if(tol>0.0d){
-			if (erro[k] - tol < DBL_EPSILON){  
-				printf("saidacom tol  %.14g erro:%.14g tol: %.14g DBLEPS:%.14g " ,(erro[k] -tol),erro[k],tol,DBL_EPSILON);
-				IsMaxIter=1;            
+			if (fabs(erro[k] - tol) < DBL_EPSILON){  
+				
 				return k;
 			} 
 		}
 		// m=aux1/aux; aux =aux1;	
         
-
-        m = aux1 / aux;
+		if (aux < DBL_EPSILON || aux > DBL_EPSILON )
+			m = aux1 / aux;
+		else{
+			fprintf(stderr,"Divisao por 0");
+			return k;
+		}
 		
 		aux = aux1;
 		
