@@ -4,6 +4,7 @@
 #include <math.h>
 #include <sys/time.h>
 #include <float.h>
+
 #define M_PI 3.1415926535
 
 	
@@ -78,10 +79,13 @@ double *calcula_func_b(int n)
 }
 
 double vetorT_x_vetor(double *a, double *b, int n)
-{
+{	//LIKWID_MARKER_INIT;
+	//LIKWID_MARKER_START("MVV");
     double aux =0.0d;
-    for (int i = 0 ; i<n ;++i) 
-        aux +=a[i]*b[i];    
+    for (int i = 0 ; i<n ;++i){ 
+        aux +=a[i]*b[i];}
+    //LIKWID_MARKER_STOP("MVV");
+    //LIKWID_MARKER_CLOSE;    
     return aux;
 }
 
@@ -91,15 +95,15 @@ void vetor_x_num(double num, double *a,int n)
         a[i] = a[i]*num;
 }
 
-void vetor_mais_vetor(double *a, double *b, double *res, int n){
-	
-for (int i = 0 ; i<n ;++i) 
+void vetor_mais_vetor(double *a, double *b, double *res, int n)
+{	
+	for (int i = 0 ; i<n ;++i) 
         res[i] = a[i] + b[i];
 }
 
-void vetor_menos_vetor(double *a, double *b, double *res, int n){
-	
-for (int i = 0 ; i<n ;++i) 
+void vetor_menos_vetor(double *a, double *b, double *res, int n)
+{	
+	for (int i = 0 ; i<n ;++i) 
         res[i] = a[i] - b[i];
 }
 
@@ -113,13 +117,13 @@ double *aloca_vetor(int n)
 {
     double *ret;
 	if ( ! ( ret = (double*) malloc(n*sizeof(double))) )return NULL;
-    for (int i = 0 ; i<n ;++i) ret[i] =0.0d;
+    //for (int i = 0 ; i<n ;++i) ret[i] =0.0d;
     return ret;
 }
 
 void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 {
-	
+	//LIKWID_MARKER_START("MMV");
     for (int i =0; i< n ;++i){
 		b[i]= a[i] * x[i];
 		//printf(" (b[%d]) = a[%d] * x[%d] +", i,i,i);
@@ -136,11 +140,12 @@ void matriz_x_vetor(double *a, double *x,double *b, int n, int nBandas)
 		}
          //printf(")\n");
 	}
+	//LIKWID_MARKER_STOP("MMV");
 }
 
 
 void main (int argc, char** argv){
-
+	
 	
 	int n;
 	int nBandas = 0;
@@ -240,7 +245,7 @@ void main (int argc, char** argv){
 	imprime_saida(arquivo_saida,k ,v_norma,erro,timeMin,timeMax,timemedio,n,x_result,timeResMin,timeResMax,timeResMedio);
 
     //free()
-   
+   //LIKWID_MARKER_CLOSE;
 	
 }
 
@@ -311,12 +316,6 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 			fprintf(stderr,"Divisao por 0");
 			return k;
 		}
-			
-		
-			//
-			//return k;
-		
-
         //
     	//calcula x(k+1) = x(k) + s*v		
 		//
@@ -330,11 +329,9 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
         //calcula  r = r- sz
 		
         vetor_x_num(s,z,n);
-        vetor_menos_vetor(r,z,r,n);         
-        
-        
-        
-		//aux1= r*r        
+        vetor_menos_vetor(r,z,r,n);
+		
+		//aux1= r*r
         
         aux1 = vetorT_x_vetor(r,r,n);
 		
@@ -376,9 +373,6 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		}
 		
 		aux = aux1;
-		
-		
-      
 		// v = r+m*r
 		copia_vetor(mr,r,n);
 		vetor_x_num(m,mr,n);	
@@ -388,11 +382,8 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 		
 		
 		double timeFim =timestamp();
-		
-        double timeResdiff= timeFimRes-timeIniRes;
-        
-        
 		double timediff= timeFim-timeIni;
+		double timeResdiff= timeFimRes-timeIniRes;
 		// iteracao
         *timeResMedio += timeResdiff;
 		if( timediff <= *timeMin){
@@ -406,6 +397,7 @@ int metodo_gradiente(double *a, double *b, int n, double tol, int maxIter,int nB
 			*timeMax=timediff;
 			
 		}
+        
         
         //res
         if( timeResdiff <= *timeMin){
